@@ -1,0 +1,24 @@
+Dragging State — Live Resize
+
+Purpose: Depict behavior while user drags the sidebar handle.
+
++-----------------------------------------------------------------------------------+
+| H: [Example]  [About]                                                             |
++-----------------------------------------------------------------------------------+
+| S: Sidebar (current 340px)             |D (dragging → col-resize)| M: Main        |
+| ------------------------------------- |<-- user drags → updates -->|---------------|
+| | Title                               |                         | | P: histogram |
+| | Slider: 150—500  [ value: 340 ]      |                         | | Live updates |
+| | (While dragging: slider optionally updates in real time) |                         |
++-----------------------------------------------------------------------------------+
+
+Behavioral notes:
+- While mouse is down + move: JS updates `--_sidebar-width` in real time.
+- Small tooltip follows cursor showing current width (e.g., "340px").
+- On drag end: JS optionally calls `Shiny.setInputValue('sidebar_width_from_js', 340, {priority: 'event'})` to sync slider with the new width.
+- Drag handle keyboard support: when focused, Left/Right arrows change width by small steps; Enter toggles collapse.
+
+Edge cases handled while dragging:
+- Clamp width to [150, 500] px.
+- If `.bslib-sidebar-layout` not found: JS no-op and console.warn.
+- Frequent updates acceptable; add debounce later if needed.

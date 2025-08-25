@@ -1,0 +1,22 @@
+About Page Wireframe
+
+Purpose: Provide project details, PRD link, and run instructions for developers.
+
++-----------------------------------------------------------------------------------+
+| H: [Example]  [About]                                                             |
++-----------------------------------------------------------------------------------+
+| S: Sidebar (small controls / credits)   |D| M: About (project description, PRD link) |
+| - Short: "Prototype details"            | | - Purpose, instructions, run commands    |
+| - Contact / version                     | | - Acceptance criteria & notes            |
++-----------------------------------------------------------------------------------+
+
+Content suggestions:
+- Short project summary: "Resizable Sidebar Shiny Prototype — shows server↔client contract for updating `--_sidebar-width` via a custom message."
+- Run instructions (copy-paste):
+  - install.packages(c("shiny","bslib"))
+  - runApp("path/to/app.R")
+- Acceptance checklist and future enhancements (persist width, localStorage, keyboard resizing improvements).
+
+Developer notes:
+- Link to `PRD.qmd` in repo root.
+- Keep content concise and actionable.

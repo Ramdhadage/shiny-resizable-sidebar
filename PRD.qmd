@@ -1,0 +1,163 @@
+---
+title: "Resizable Sidebar Shiny Prototype — PRD"
+author: ""
+date: "2025-08-25"
+format: html
+---
+
+## One-line summary
+
+A lightweight prototype and proof-of-concept Shiny app that demonstrates a resizable `bslib` sidebar controlled from Shiny (server) and by user dragging. This PRD describes the purpose, audience, features, technical contract, and acceptance criteria needed to produce a single-file `app.R` prototype.
+
+## Checklist (requirements extracted from the request)
+
+- [x] Use R + Shiny (allowed: JS, jQuery, Bootstrap via `bslib`) — Required
+- [x] Single-file Shiny app: `app.R` — Required
+- [x] Use `bslib::page_sidebar()` and target `.bslib-sidebar-layout` — Required
+- [x] Sidebar default width ≈ 250px, but user can change width by dragging — Required
+- [x] Sidebar contains a `sliderInput` controlling a numeric value — Required
+- [x] Main panel has a reactive `plotOutput()` (histogram) driven by the slider — Required
+- [x] Client JS embedded with `shiny::tags$script()` and listens for a custom message — Required
+- [x] JS updates `--_sidebar-width` on `.bslib-sidebar-layout` per message — Required
+- [x] Server uses `observeEvent()` and `session$sendCustomMessage()` to send slider value — Required
+- [x] Prototype includes simple navigation, sample dataset, and basic styling — Required
+
+## Title & Purpose
+
+Resizable Sidebar Shiny Prototype — demo resizable `bslib` sidebar controlled by server messages and user dragging. The goal is a minimal, single-file prototype that proves the UI pattern and messaging contract.
+
+## Background & Goals
+
+- Validate a pattern to let Shiny server update a `bslib` sidebar width via a CSS variable and custom message.
+- Demonstrate a user-driven drag handle that resizes the sidebar and optionally syncs back to Shiny inputs.
+- Provide a small runnable example (`app.R`) to use as an integration template in larger Shiny apps.
+
+## Target audience & user roles
+
+- End-users: adjust sidebar width to personalize the layout.
+- Developers: learn and copy the pattern (Shiny ↔ JS messaging, CSS var updates, drag handling) into production apps.
+
+## High-level features
+
+1. Page layout using `bslib::page_sidebar()`.
+2. Sidebar with a `sliderInput()` (numeric range) and small UI elements.
+3. Drag handle between sidebar and main content to resize the sidebar (cursor: `col-resize`).
+4. Server-driven update: slider -> `observeEvent()` -> `session$sendCustomMessage()` -> client updates CSS var.
+5. Main panel with `plotOutput()` that reacts to the slider value (simple histogram using sample data).
+6. Minimal navigation: 2 tabs (Example, About) to show simple navigation.
+7. Styling: use `bslib` theme; provide a tiny custom CSS snippet.
+
+## Functional requirements (explicit & testable)
+
+- Default sidebar width: 250px.
+- Slider numeric range: 150 — 500 (px).
+- Slider changes must update the plot immediately.
+- Slider changes must be sent to the client and update the CSS variable `--_sidebar-width` on `.bslib-sidebar-layout` (pixels).
+- User dragging the handle must update the CSS variable in real time and optionally send the new width back to Shiny via `Shiny.setInputValue()` (two-way sync is optional but recommended for parity).
+
+## Non-functional & technical constraints
+
+- Primary language: R (Shiny). Permitted client tech: JavaScript (embedded), jQuery allowed, Bootstrap via `bslib`.
+- Single-file deliverable: `app.R` (the prototype to be generated from this PRD).
+- No external network dependencies at runtime (all code embedded).
+- Target compatibility: R >= 4.0, `shiny` >= 1.6, `bslib` (current release around 2024+). If strict versions are required, list them here.
+- Accessibility baseline: drag handle should be keyboard-focusable (basic support) or gracefully degrade when JS disabled.
+
+## UI / UX specification
+
+- Page structure:
+  - Sidebar (left) width controlled by CSS variable `--_sidebar-width`.
+  - Drag handle: vertical bar 8–12px wide, visually distinct, with `cursor: col-resize`.
+  - Main content: reactive plot and small header.
+- CSS variable to update: `--_sidebar-width`.
+- DOM target: `.bslib-sidebar-layout` (explicit selector).
+
+## Message contract (engineering contract)
+
+- Custom message name: `setSidebarWidth`.
+- Message payload: numeric width (pixels). Example payload: `300`.
+- Client handler (JS):
+  - `Shiny.addCustomMessageHandler('setSidebarWidth', function(width) { /* set var */ })`.
+  - Action: find `.bslib-sidebar-layout` and call `.style.setProperty('--_sidebar-width', width + 'px')`.
+- Server behavior: on `input$sidebar_slider` change, call `session$sendCustomMessage('setSidebarWidth', input$sidebar_slider)`.
+- Error handling:
+  - Invalid payload -> client no-op + `console.warn`.
+  - Missing target element -> no-op.
+
+Short engineering contract (2–4 bullets)
+
+- Inputs: `input$sidebar_slider` numeric (150–500 px) and optional `input$sidebar_width_from_js` (if two-way sync enabled).
+- Outputs: CSS var `--_sidebar-width` on `.bslib-sidebar-layout`; reactive histogram updated in main panel.
+- Error modes: out-of-range values are clamped; missing DOM element ignored; JS-disabled browsers retain functional plot but fixed sidebar.
+- Success criteria: slider changes update the sidebar visually and update the plot; dragging updates the sidebar width visually (and syncs back to slider if implemented).
+
+## Data model & sample dataset
+
+- Use built-in `faithful` or generated `rnorm()` dataset for a histogram.
+- Example: `hist(rnorm(1000), breaks = input$slider)` OR slider controls number of bins.
+- Data shape: numeric vector.
+
+## Edge cases and acceptance criteria
+
+Edge cases to address:
+- Slider value beyond allowed min/max -> clamp before sending to client.
+- Rapid slider movements -> acceptable to send frequent messages; implement debounce only if performance issues arise.
+- Narrow browser -> enforce minimum sidebar width (150px) so content doesn't break.
+- JS disabled -> plot still updates; sidebar remains at default width.
+
+Acceptance criteria (pass/fail):
+- Sidebar width visually updates when the slider is moved. (PASS if visual width changes)
+- Plot updates responsively when the slider moves. (PASS if plot redraws)
+- Dragging the handle resizes the sidebar in real time. (PASS if visual width changes while dragging)
+- `app.R` runs standalone without errors. (PASS if Shiny app launches and no JS console errors related to the handler)
+
+## Technical tasks / implementation notes for the developer (Copilot Agent)
+
+- Produce a single-file `app.R` that: 
+  - Loads `shiny` and `bslib`.
+  - Uses `bslib::page_sidebar()` with a default sidebar width of 250px.
+  - Has a sidebar `sliderInput('sidebar_slider', 'Sidebar width (px)', min = 150, max = 500, value = 250)`.
+  - Embeds JS via `tags$script(HTML(...))` implementing:
+    - `Shiny.addCustomMessageHandler('setSidebarWidth', function(width) { /* set --_sidebar-width on .bslib-sidebar-layout */ });`
+    - Drag handle implementation (mousedown/mousemove/mouseup) that updates the CSS var and calls `Shiny.setInputValue('sidebar_width_from_js', newWidth, {priority: 'event'})` when finished or continuously if desired.
+  - Server uses `observeEvent(input$sidebar_slider, { session$sendCustomMessage('setSidebarWidth', input$sidebar_slider) })`.
+  - The main panel contains `plotOutput('main_plot')` and the server renders a histogram that uses the slider value (e.g., number of bins or scale).
+  - Basic two-tab navigation using `tabsetPanel()` or `navlistPanel()`.
+  - Minimal inline CSS to style drag handle and ensure the layout uses `--_sidebar-width`.
+
+## Test plan / validation
+
+- Manual smoke tests:
+  1. Start the app.
+  2. Move the slider: verify plot updates and sidebar width changes.
+  3. Drag the handle: verify sidebar resizes while dragging; if two-way sync is implemented, verify slider moves to match.
+  4. Open browser devtools: check for JS errors.
+
+- Optional automated validation: simple R script that launches the app and verifies server-side objects exist. Full headless browser tests are out-of-scope here but can be added later.
+
+## Deliverables & run instructions
+
+Deliverables:
+- `app.R` — single-file Shiny prototype (created next, based on this PRD).
+- `PRD.qmd` — this Quarto PRD (this file).
+
+Run instructions (copy-paste into R console):
+
+```r
+install.packages(c("shiny", "bslib"))
+# From inside R: runApp("path/to/app.R") or source("app.R") if it contains a runApp call.
+```
+
+## Acceptance sign-off & future enhancements
+
+Sign-off criteria: prototype runs, interactive resizing works, plot reacts to slider, no critical console errors.
+
+Potential future items:
+- Persist sidebar width in localStorage or cookie.
+- Smooth CSS transitions / animations when resizing programmatically.
+- Save/restore layout per user.
+- Accessibility improvements for keyboard resizing and ARIA attributes.
+
+---
+
+*PRD created and formatted as Quarto (`PRD.qmd`) on 2025-08-25.*

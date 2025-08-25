@@ -1,0 +1,21 @@
+Navigation Wireframe
+
+Purpose: Describes the top-level navigation and message contract for the prototype app.
+
+Header / Tabs
+- Tabs: [Example]  [About]
+- Active tab shows page content; tab state persisted in UI only.
+
+Behavior
+- Clicking a tab switches the main content.
+- Navigation is simple: no nested menus.
+
+Message contract (quick reference)
+- Server -> Client: Custom message name `setSidebarWidth`
+  - Payload: numeric width in pixels (e.g., 300)
+  - Client handler: `Shiny.addCustomMessageHandler('setSidebarWidth', width => { element.style.setProperty('--_sidebar-width', width + 'px') })`
+- Client -> Server (optional two-way sync): `Shiny.setInputValue('sidebar_width_from_js', newWidth, {priority: 'event'})`
+
+Notes / Accessibility
+- Visible focus for tabs; keyboard navigation using arrow/tab keys.
+- Minimal: Emphasize clarity for developers reproducing the pattern.

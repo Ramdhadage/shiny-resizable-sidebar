@@ -1,0 +1,28 @@
+Example Page — Desktop (Default)
+
+Legend:
+- [S] Sidebar (CSS var: --_sidebar-width, default 250px)
+- [D] Drag handle (8-12px, cursor: col-resize, tabindex=0)
+- [M] Main content / panel
+- [H] Header / tabs
+- [P] Plot output (reactive)
+- [I] Inputs (sliderInput)
+
++-----------------------------------------------------------------------------------+
+| H: [Example]  [About]                                                             |
++-----------------------------------------------------------------------------------+
+| S: Sidebar (250px default)            |D|  M: Main content                         |
+| ------------------------------------- | |  --------------------------------------- |
+| | Title / small nav                   | |  | Page Title                            |
+| | - Sidebar width (px)                | |  | - Plot: histogram (reactive)         |
+| |   [ slider 150 — 500 ] (value=250)  | |  | - Small controls / legend             |
+| | - Optional controls (checkbox)      | |  | - Status: "sidebar width: 250px"     |
+| | - Help / hint text                  | |  |                                       |
+| ------------------------------------- | |  |                                       |
+| Notes: slider change -> server sends `setSidebarWidth` (msg) | |  | P (plotOutput)                      |
++-----------------------------------------------------------------------------------+
+
+UI details:
+- Numeric readout next to slider shows px value.
+- Sidebar content stacks vertically; use bslib styling.
+- Drag handle located between sidebar and main area; visible on hover.

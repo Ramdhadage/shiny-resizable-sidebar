@@ -1,0 +1,19 @@
+Mobile / Narrow View — Fallback
+
+Purpose: Show behavior on narrow screens; graceful degradation.
+
++----------------------------------+
+| H: [Example]  [About]            |
++----------------------------------+
+| [Menu icon] Sidebar (collapsed)  |
+| -> tap/slide opens sidebar drawer|
++----------------------------------+
+| M: Main content (plot)           |
++----------------------------------+
+
+Notes:
+- For viewports where sidebar would be too narrow, convert sidebar to an overlay drawer.
+- Minimum effective sidebar width enforced at 150px.
+- If JS disabled: sidebar remains fixed at 250px (no drag); plot still updates via slider changes handled server-side.
+- Consider a compact toggle button that shows/hides sidebar on mobile.
+- Accessibility: drawer trap-focus while open; Esc closes drawer.
