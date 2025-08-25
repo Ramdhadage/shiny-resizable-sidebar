@@ -1,62 +1,73 @@
-<!-- prettier-ignore -->
-# ✨ Resizable Sidebar — Shiny Prototype
+# ✨ Resizable Sidebar — shiny and bslib Package
 
-A small, playful, single-file Shiny prototype that demonstrates a resizable `bslib` sidebar you can control from the server and by dragging in the browser.
+[![Project Status: Prototype](https://img.shields.io/badge/Project%20Status-Active-green)](https://github.com/Ramdhadage/shiny-resizable-sidebar) [![Try it now!](https://img.shields.io/badge/Try%20it-online-blue)](https://ramdhadage.github.io/shiny-resizable-sidebar/)
 
-Status: Prototype — see `ShinyApp/app.R`
+## 📖 About The Project
 
-Why this project?
-- It demonstrates a clear UI contract between Shiny (server) and client JS using a custom message (`setSidebarWidth`).
-- Useful as a copy-paste starter for dashboards that need a resizable navigation pane.
+A minimal, single-file Shiny prototype that demonstrates a resizable `bslib` sidebar controllable from the server and via a draggable handle in the browser.
 
-Highlights
-- 🎛️ Sidebar width controlled by a `sliderInput()` (150–500 px) and a draggable handle.
-- 🧭 Two simple tabs: Example (interactive histogram) and About (notes & run instructions).
-- 📊 Reactive histogram using the built-in `faithful` dataset — bins map to sidebar width for an immediate visual effect.
-- ♿ Basic accessibility: drag handle is keyboard-focusable (Arrow keys adjust width).
+* Sidebar width is controlled by a `sliderInput()` (150–500 px) and a draggable handle
+* Two simple tabs: Example (interactive histogram) and About (project notes)
+* Live client-server contract via custom message `setSidebarWidth` (see `PRD.qmd`)
+* Accessible: drag handle is keyboard-focusable (basic Arrow key support)
 
-Quick start (run locally)
+
+### 💡 Why this matters
+
+* Customizable sidebars improve usability for dashboards and data apps
+* Responsive layouts adapt to any screen size, making content more accessible
+* Demonstrates a reusable Shiny ↔ JS messaging pattern for UI control
+* Shows how to combine R, Shiny, bslib, and client-side scripting for modern UX
+* Problem: many Shiny dashboards assume a fixed sidebar width, which can make content cramped on small screens or waste space on large ones
+* Our approach: expose the sidebar width as a CSS variable (`--_sidebar-width`) and update it from the server or via a draggable handle in the client. The result is a responsive, live-resizable layout that keeps data visible and usable
+
+### 🗂️ What you'll find here
+
+- A single-file prototype at `shiny_app/app.R` demonstrating the pattern
+- A slider to control sidebar width (150–500 px) that sends a `setSidebarWidth` message to the client
+- A draggable handle that resizes the sidebar in real time and can sync back to the Shiny input
+* A single-file prototype at `shiny_app/app.R` demonstrating the pattern
+* A slider to control sidebar width (150–500 px) that sends a `setSidebarWidth` message to the client
+* A draggable handle that resizes the sidebar in real time and can sync back to the Shiny input
+
+### ⚡ Key behavior (short)
+* Default width: 250 px. Slider range: 150–500 px. Values are clamped
+* Message contract: Server -> Client: `setSidebarWidth` (numeric px). Client updates `.bslib-sidebar-layout` via `--_sidebar-width`
+
+## 🖥 Live Demo
+**Try it out:**  
+- Adjust the sidebar width using the slider and see the histogram update instantly.
+- Drag the vertical handle to resize the sidebar interactively—changes reflect live in the layout.
+
+**Launch the demo in your browser:**  
+[https://ramdhadage.github.io/shiny-resizable-sidebar/](https://ramdhadage.github.io/shiny-resizable-sidebar/)
+
+## 🚀 Installation
 
 1. Install dependencies (once):
-
 ```r
 install.packages(c("shiny", "bslib"))
 ```
 
 2. Run the app from R:
-
 ```r
-shiny::runApp("ShinyApp")
-# or open and run: ShinyApp/app.R
+shiny::runApp("shiny_app")
+# or open and run: shiny_app/app.R
 ```
+## Files of interest
+* `shiny_app/app.R` — the full prototype (UI, server, CSS, embedded JS)
+* `PRD.qmd` — product requirements and engineering contract for the custom message
+* `wireframes/` — simple text wireframes documenting intended UX states
 
-What you'll see
-- Move the sidebar slider — the server sends a `setSidebarWidth` message and the client updates the CSS variable `--_sidebar-width`.
-- Drag the vertical handle between the sidebar and main content to resize live — the new width is optionally synced back to the Shiny input.
+## Design notes (engineer quick reference)
+* CSS variable: `--_sidebar-width` on `.bslib-sidebar-layout`
+* Server call: `session$sendCustomMessage('setSidebarWidth', value)`
+* Client handler: `Shiny.addCustomMessageHandler('setSidebarWidth', width => { element.style.setProperty('--_sidebar-width', width + 'px') })`
+* Optional client -> server sync: `Shiny.setInputValue('sidebar_width_from_js', width, {priority:'event'})`
 
-Files of interest
-- `ShinyApp/app.R` — the single-file prototype (UI, server, CSS, and embedded JS).
-- `PRD.qmd` / `PRD.html` — product requirements and acceptance criteria.
-- `wireframes/` — low-fidelity text wireframes used for the UI design.
-- `.github/copilot-instructions.md` — developer-facing instructions and the PRD + wireframes bundle.
+## Contributing
+* Small prototype — issues and PRs welcome. For local development, open `shiny_app/app.R` and run the app locally
 
-Developer contract (quick)
-- Server message: `setSidebarWidth` — payload: numeric width (px).
-- Client handler: `Shiny.addCustomMessageHandler('setSidebarWidth', width => { /* set --_sidebar-width */ })`.
-- Optional client -> server sync: `Shiny.setInputValue('sidebar_width_from_js', newWidth, {priority:'event'})`.
+## License
+* MIT
 
-Tips & notes
-- The UI clamps width to the [150, 500] px range to avoid layout breakage.
-- The prototype includes keyboard and touch support for the drag handle.
-- This project intentionally keeps external resources to a minimum; add badges or CI later as needed.
-
-Contributing
-- Fork, make features/fixes, open a PR. Add a short note describing changes.
-
-License
-- No license file is included by default. If you plan to publish, add a license (MIT recommended) in the repo root.
-
-Contact
-- If you want me to polish the UI, add tests, or wire up localStorage persistence for the sidebar width, tell me which you'd like next.
-
-Enjoy! 🚀
